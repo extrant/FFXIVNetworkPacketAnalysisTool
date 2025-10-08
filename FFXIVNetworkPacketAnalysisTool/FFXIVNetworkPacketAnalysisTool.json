@@ -1,0 +1,19 @@
+{
+    "Author": "Siren",
+    "Name": "FFXIV Network Packet Analysis Tool",
+    "Punchline": "FFXIV NPATool",
+    "Description": "一个用于分析游戏内网络包详细内容的Debug工具，更推荐开发人员使用。",
+    "InternalName": "FFXIVNetworkPacketAnalysisTool",
+    "AssemblyVersion": "0.1.2.0",
+    "RepoUrl": "https://github.com/extrant/I-Ching",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 13,
+    "TestingDalamudApiLevel": 13,
+    "IsHide": "False",
+    "IsTestingExclusive": "False",
+    "DownloadCount": 1919810,
+    "LastUpdate": 0,
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/extrant/I-Ching/main/I-Ching-GL.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/extrant/I-Ching/main/I-Ching-GL.zip",
+    "IconUrl": "https://raw.githubusercontent.com/extrant/IMGSave/refs/heads/main/FFXivStorkLauncher/NPATool.png"
+}
