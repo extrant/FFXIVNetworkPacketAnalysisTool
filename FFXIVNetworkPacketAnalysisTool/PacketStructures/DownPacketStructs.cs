@@ -211,7 +211,7 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
     [StructLayout(LayoutKind.Explicit, Size = 0x18)]
     public struct DOWN_ActorControl
     {
-        [FieldOffset(0x00)] public ushort Id; // ActorControlId 枚举值
+        [FieldOffset(0x00)] public ActorControlId Id; // ActorControlId 枚举值
         [FieldOffset(0x04)] public uint Arg0;
         [FieldOffset(0x08)] public uint Arg1;
         [FieldOffset(0x0C)] public uint Arg2;

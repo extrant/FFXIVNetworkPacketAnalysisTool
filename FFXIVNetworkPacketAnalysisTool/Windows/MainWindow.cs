@@ -777,12 +777,27 @@ public class MainWindow : Window, IDisposable
                 // 尝试读取值（收包需要加上包头偏移）
                 try
                 {
-                    var value = ReadFieldValue(packet.RawData, offset + headerOffset, field.FieldType, field.Name, structType, fields);
-                    ImGui.Text(value);
+                    var k = ReadFieldValue(field.FieldType, packet.RawData, offset+headerOffset);
+                    // 一般来说只有枚举需要原始数据
+                    if (field.FieldType.IsEnum)
+                    {
+                        var name = Enum.GetName(field.FieldType, k) ?? k.ToString();
+                        var underlying = Enum.GetUnderlyingType(field.FieldType);
+                        var numeric = Convert.ChangeType(k, underlying);
+                        ImGui.Text($"{name} ({numeric})");
+                    }
+                    else
+                    {
+                        ImGui.Text(k.ToString());
+                    }
+                    
+                    // 这里去掉读取类型了
+                    // var value = ReadFieldValue(packet.RawData, offset + headerOffset, field.FieldType, field.Name, structType, fields);
+                    
                 }
-                catch
+                catch(Exception e)
                 {
-                    ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "读取失败");
+                    ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), $"{e.Message}");
                 }
             }
 
@@ -795,6 +810,23 @@ public class MainWindow : Window, IDisposable
         ImGui.EndChild();
     }
 
+    
+    public static object ReadFieldValue(Type type, byte[] data, int offset) {
+        if (offset >= data.Length) return "超出范围";
+        var method = typeof(StructConverter)
+                     .GetMethod(nameof(StructConverter.FromBytesGeneric), BindingFlags.Static | BindingFlags.Public)
+                     ?.MakeGenericMethod(type);
+
+        return method.Invoke(null, [data, offset]);
+    }
+
+    public static class StructConverter {
+        public static T FromBytesGeneric<T>(byte[] data, int offset) where T : struct {
+            return MemoryMarshal.Cast<byte, T>(data.AsSpan(offset))[0];
+        }
+    }
+    
+    
     private Type? FindStructType(string opcodeName)
     {
         // 检查缓存
