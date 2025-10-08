@@ -1,10 +1,3 @@
-<style>
-img {
-  display: block;
-  margin: 0 auto;
-}
-</style>
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/extrant/IMGSave/refs/heads/main/FFXivStorkLauncher/NPATool.png" alt="LOGO">
 </p>
