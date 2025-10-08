@@ -14,6 +14,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using FFXIVNetworkPacketAnalysisTool.Utils;
+using FFXIVNetworkPacketAnalysisTool.PacketStructures;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -867,7 +868,32 @@ public class MainWindow : Window, IDisposable
                 return offset < data.Length ? $"0x{data[offset]:X2}" : "N/A";
 
             if (fieldType == typeof(ushort))
-                return offset + 1 < data.Length ? $"0x{*(ushort*)(ptr + offset):X4}" : "N/A";
+            {
+                if (offset + 1 < data.Length)
+                {
+                    ushort value = *(ushort*)(ptr + offset);
+
+                    // 特殊处理：如果是 ActorControl 相关结构体的 Id 字段，显示枚举名称
+                    if (fieldName == "Id" && structType != null &&
+                        (structType.Name == "DOWN_ActorControl" ||
+                         structType.Name == "DOWN_ActorControlSelf" ||
+                         structType.Name == "DOWN_ActorControlTarget"))
+                    {
+                        if (System.Enum.IsDefined(typeof(ActorControlId), value))
+                        {
+                            var enumName = ((ActorControlId)value).ToString();
+                            return $"0x{value:X4} ({enumName})";
+                        }
+                        else
+                        {
+                            return $"0x{value:X4} (Unknown)";
+                        }
+                    }
+
+                    return $"0x{value:X4}";
+                }
+                return "N/A";
+            }
 
             if (fieldType == typeof(uint))
                 return offset + 3 < data.Length ? $"0x{*(uint*)(ptr + offset):X8}" : "N/A";

@@ -223,6 +223,19 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
         public ActorControlId ControlId => (ActorControlId)Id;
 
         /// <summary>
+        /// 获取控制类型名称（用于UI显示）
+        /// </summary>
+        public string ControlIdName
+        {
+            get
+            {
+                if (System.Enum.IsDefined(typeof(ActorControlId), Id))
+                    return ((ActorControlId)Id).ToString();
+                return $"Unknown(0x{Id:X4})";
+            }
+        }
+
+        /// <summary>
         /// 包修正：根据控制类型调整参数值
         /// 用于修正相对ID为绝对ID（例如 SetLockOn 时 Arg0 需要加上基准值）
         /// </summary>
@@ -248,6 +261,24 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
         [FieldOffset(0x10)] public uint Arg3;
         [FieldOffset(0x14)] public uint Arg4;
         [FieldOffset(0x18)] public uint Arg5;
+
+        /// <summary>
+        /// 获取控制类型枚举
+        /// </summary>
+        public ActorControlId ControlId => (ActorControlId)Id;
+
+        /// <summary>
+        /// 获取控制类型名称（用于UI显示）
+        /// </summary>
+        public string ControlIdName
+        {
+            get
+            {
+                if (System.Enum.IsDefined(typeof(ActorControlId), Id))
+                    return ((ActorControlId)Id).ToString();
+                return $"Unknown(0x{Id:X4})";
+            }
+        }
     }
 
     /// <summary>
@@ -262,6 +293,24 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
         [FieldOffset(0x0C)] public uint Arg2;
         [FieldOffset(0x10)] public uint Arg3;
         [FieldOffset(0x18)] public ulong TargetId;
+
+        /// <summary>
+        /// 获取控制类型枚举
+        /// </summary>
+        public ActorControlId ControlId => (ActorControlId)Id;
+
+        /// <summary>
+        /// 获取控制类型名称（用于UI显示）
+        /// </summary>
+        public string ControlIdName
+        {
+            get
+            {
+                if (System.Enum.IsDefined(typeof(ActorControlId), Id))
+                    return ((ActorControlId)Id).ToString();
+                return $"Unknown(0x{Id:X4})";
+            }
+        }
     }
 
     /// <summary>
