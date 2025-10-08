@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FFXIVNetworkPacketAnalysisTool.Utils;
 
 public class OnlineOpcode
 {
@@ -58,6 +59,8 @@ public class OnlineOpcode
                     }
                 }
             }
+            // 加载内置的(反正扫描不到不会加入)
+            LocalOpcode.SetLocalUpOpcode(Configuration.UpOpcodes);
 
             Plugin.ChatGui.Print($"联网Opcode已加载！上行: {Configuration.UpOpcodes.Count} 个, 下行: {Configuration.DownOpcodes.Count} 个。");
 
