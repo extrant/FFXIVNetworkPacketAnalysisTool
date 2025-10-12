@@ -1,5 +1,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Dalamud.Game.Text;
+
 namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
 {
     // UP (发包) 结构体定义
@@ -263,9 +265,35 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
     /// 潜水TP包
     /// </summary>
     [StructLayout((LayoutKind.Explicit), Size = 0x30)]
-    public unsafe struct UP_DiveStart()
+    public unsafe struct UP_DiveStart
     {
         [FieldOffset(0x0)] public float Rotation;
         [FieldOffset(0x4)] public Vector3 Position;
+    }
+    
+    /// <summary>
+    /// 公共频道发言 
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 1072)]
+    public unsafe struct UP_ChatHandler
+    {
+        [FieldOffset(0)]
+        public int a1; // 默认是0
+
+        [FieldOffset(4)]
+        public uint EntityID;   // 自己的Eid
+
+        [FieldOffset(8)]
+        public Vector3 position; // 坐标
+
+        [FieldOffset(20)]
+        public float rotation; // 方向
+
+        [FieldOffset(24)]
+        public XivChatType xivChatType; // 频道
+
+        [FieldOffset(26)]
+        public fixed byte Utf8string[1046];
+
     }
 }
