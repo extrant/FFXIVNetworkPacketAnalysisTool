@@ -67,6 +67,7 @@ FFXIV Network Packet Analysis Tool 以下简称 FFXIV NPATool 是一个用于分
 <p align="center">
   <img src="https://raw.githubusercontent.com/extrant/IMGSave/refs/heads/main/FFXIV%20NPATool/%E5%9F%BA%E6%9C%AC%E4%B8%BB%E7%95%8C%E9%9D%A2.png" alt="基本主界面">
 </p>
+
 ### 界面说明
 
 #### 会话管理标签栏

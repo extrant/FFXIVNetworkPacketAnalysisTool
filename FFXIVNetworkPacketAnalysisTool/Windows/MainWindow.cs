@@ -546,6 +546,11 @@ public class MainWindow : Window, IDisposable
 
                 if (ImGui.BeginPopup($"PacketContextMenu{i}"))
                 {
+                    if (ImGui.MenuItem("重发此包"))
+                    {
+                        OpenResendWindow(packet);
+                    }
+
                     if (ImGui.MenuItem("删除此包"))
                     {
                         _currentSession.Packets.Remove(packet);
@@ -1009,5 +1014,29 @@ public class MainWindow : Window, IDisposable
 
             return $"未知类型 ({fieldType.Name})";
         }
+    }
+
+    private void OpenResendWindow(PacketInfo packet)
+    {
+        // 查找对应的结构体
+        var structType = FindStructType(packet.OpcodeName);
+
+        // 生成唯一的窗口ID
+        var windowId = $"ResendPacket{packet.Timestamp.Ticks}";
+
+        // 检查是否已经存在相同的窗口
+        var existingWindow = Plugin.WindowSystem.Windows.FirstOrDefault(w => w.WindowName.Contains(windowId));
+        if (existingWindow != null)
+        {
+            // 如果窗口已存在，直接打开它
+            existingWindow.IsOpen = true;
+            return;
+        }
+
+        // 创建重发窗口
+        var resendWindow = new PacketResendWindow(Plugin, packet, structType);
+
+        // 添加到窗口系统
+        Plugin.WindowSystem.AddWindow(resendWindow);
     }
 }

@@ -104,7 +104,7 @@ namespace FFXIVNetworkPacketAnalysisTool.Utils
         }
 
         public void SendPackt<T>(T data) where T : unmanaged, IGamePacket =>
-            SendPacket(Framework.Instance()->NetworkModuleProxy, (byte*)&data, 0, 0x9876543); // 打个标记
+            SendPacket(Framework.Instance()->NetworkModuleProxy, (byte*)&data, 0, 0x114514); // 打个标记
 
         private void* SendPacketInternalDetour(NetworkModuleProxy* module, byte* packet, int a3, int a4, ushort priority)
         {
