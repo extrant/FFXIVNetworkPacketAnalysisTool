@@ -288,8 +288,77 @@ public class PacketResendWindow : Window, IDisposable
         }
         else if (IsFixedArray(field.FieldType))
         {
-            // 固定数组：显示但不允许编辑（暂时）
-            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "[固定数组 - 暂不支持编辑]");
+            string lowerFieldName = field.Name.ToLower();
+
+            // 处理需要坐标转换的 Pos 字段（从 ushort 转换为 Vector3）
+            if (lowerFieldName.Contains("pos") && StructType != null)
+            {
+                // 根据结构体类型判断是否需要坐标转换
+                string structName = StructType.Name;
+                bool needsWebToRawConversion = structName == "DOWN_ActorMove" ||
+                                             structName == "DOWN_ActorCast" ||
+                                             structName.Contains("DOWN_AoeEffect");
+
+                if (needsWebToRawConversion)
+                {
+                    // 尝试从 FieldValues 获取存储的 Vector3，如果没有则从原始数据计算
+                    Vector3 currentPos;
+                    if (FieldValues.TryGetValue(field.Name, out var posValue) && posValue is Vector3)
+                    {
+                        currentPos = (Vector3)posValue;
+                    }
+                    else
+                    {
+                        // 从原始数据读取并转换坐标
+                        try
+                        {
+                            var offsetAttr = field.GetCustomAttribute<FieldOffsetAttribute>();
+                            if (offsetAttr != null)
+                            {
+                                int offset = offsetAttr.Value + PACKET_HEADER_SIZE;
+                                currentPos = ReadWebPosFromData(EditableData, offset);
+                                FieldValues[field.Name] = currentPos;
+                            }
+                            else
+                            {
+                                currentPos = Vector3.Zero;
+                            }
+                        }
+                        catch
+                        {
+                            currentPos = Vector3.Zero;
+                        }
+                    }
+
+                    // 使用三个浮点数拖拽条编辑
+                    ImGui.SetNextItemWidth(100);
+                    if (ImGui.DragFloat("##x", ref currentPos.X, 0.1f, float.MinValue, float.MaxValue, "X: %.3f"))
+                    {
+                        FieldValues[field.Name] = currentPos;
+                    }
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(100);
+                    if (ImGui.DragFloat("##y", ref currentPos.Y, 0.1f, float.MinValue, float.MaxValue, "Y: %.3f"))
+                    {
+                        FieldValues[field.Name] = currentPos;
+                    }
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(100);
+                    if (ImGui.DragFloat("##z", ref currentPos.Z, 0.1f, float.MinValue, float.MaxValue, "Z: %.3f"))
+                    {
+                        FieldValues[field.Name] = currentPos;
+                    }
+                }
+                else
+                {
+                    ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "[固定数组 - 暂不支持编辑]");
+                }
+            }
+            else
+            {
+                // 其他固定数组：显示但不允许编辑
+                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "[固定数组 - 暂不支持编辑]");
+            }
         }
         else
         {
@@ -328,9 +397,6 @@ public class PacketResendWindow : Window, IDisposable
 
         foreach (var field in fields)
         {
-            if (IsFixedArray(field.FieldType))
-                continue; // 跳过固定数组
-
             var offsetAttr = field.GetCustomAttribute<FieldOffsetAttribute>();
             if (offsetAttr == null) continue;
 
@@ -340,7 +406,35 @@ public class PacketResendWindow : Window, IDisposable
             {
                 object value;
 
-                if (field.FieldType.IsEnum)
+                if (IsFixedArray(field.FieldType))
+                {
+                    string lowerFieldName = field.Name.ToLower();
+
+                    // 处理需要坐标转换的 Pos 字段（从 ushort 转换为 Vector3）
+                    if (lowerFieldName.Contains("pos") && StructType != null)
+                    {
+                        string structName = StructType.Name;
+                        bool needsWebToRawConversion = structName == "DOWN_ActorMove" ||
+                                                     structName == "DOWN_ActorCast" ||
+                                                     structName.Contains("DOWN_AoeEffect");
+
+                        if (needsWebToRawConversion && FieldValues.TryGetValue(field.Name, out var posValue) && posValue is Vector3)
+                        {
+                            // 将 Vector3 写回为 fixed ushort Pos[3]
+                            WriteWebPosToData(EditableData, offset, (Vector3)posValue);
+                            value = posValue;
+                        }
+                        else
+                        {
+                            continue; // 跳过不支持的固定数组
+                        }
+                    }
+                    else
+                    {
+                        continue; // 跳过其他固定数组
+                    }
+                }
+                else if (field.FieldType.IsEnum)
                 {
                     // 尝试从手动输入解析，如果失败则使用当前选中值
                     var input = FieldInputs[field.Name];
@@ -359,14 +453,15 @@ public class PacketResendWindow : Window, IDisposable
                 {
                     // Vector3 等复杂类型直接从 FieldValues 获取（已在 UI 中更新）
                     value = FieldValues[field.Name];
+                    WriteFieldValue(field.FieldType, EditableData, offset, value);
                 }
                 else
                 {
                     var input = FieldInputs[field.Name];
                     value = ParseNumericValue(input, field.FieldType);
+                    WriteFieldValue(field.FieldType, EditableData, offset, value);
                 }
 
-                WriteFieldValue(field.FieldType, EditableData, offset, value);
                 FieldValues[field.Name] = value;
             }
             catch (Exception ex)
@@ -484,6 +579,40 @@ public class PacketResendWindow : Window, IDisposable
             ?.MakeGenericMethod(type);
 
         return method?.Invoke(null, new object[] { data, offset }) ?? throw new InvalidOperationException("无法读取字段值");
+    }
+
+    private unsafe Vector3 ReadWebPosFromData(byte[] data, int offset)
+    {
+        if (offset + 5 >= data.Length)
+            return Vector3.Zero;
+
+        fixed (byte* ptr = data)
+        {
+            ushort x = *(ushort*)(ptr + offset);
+            ushort y = *(ushort*)(ptr + offset + 2);
+            ushort z = *(ushort*)(ptr + offset + 4);
+
+            var webCoords = new[] { x, y, z };
+            return CoordinateConverter.CreatePosFromWebCoords(webCoords);
+        }
+    }
+
+    private unsafe void WriteWebPosToData(byte[] data, int offset, Vector3 pos)
+    {
+        if (offset + 5 >= data.Length)
+            throw new IndexOutOfRangeException("偏移超出数据范围");
+
+        fixed (byte* ptr = &data[offset])
+        {
+            // 将 Vector3 坐标转换为 Web 坐标系的 ushort 值
+            ushort x = (ushort)Math.Round(pos.X * 1000f);
+            ushort y = (ushort)Math.Round(pos.Y * 1000f);
+            ushort z = (ushort)Math.Round(pos.Z * 1000f);
+
+            *(ushort*)ptr = x;
+            *(ushort*)(ptr + 2) = y;
+            *(ushort*)(ptr + 4) = z;
+        }
     }
 
     private unsafe void WriteFieldValue(Type type, byte[] data, int offset, object value)

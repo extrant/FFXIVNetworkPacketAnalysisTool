@@ -36,7 +36,7 @@ namespace FFXIVNetworkPacketAnalysisTool.Utils
         private ConcurrentDictionary<string, int> _packetLengthCache = new ConcurrentDictionary<string, int>();
 
         private static readonly CompSig SendPacketInternalSig =
-            new("48 83 EC ?? 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? 44 89 44 24 ?? 4C 8D 44 24 ?? 44 89 4C 24 ?? 44 0F B6 4C 24");
+            new("e8 ?? ?? ?? ?? 84 ?? 74 ?? 48 ?? ?? c7 87 ?? ?? ?? ?? ?? ?? ?? ??");
         private delegate void* SendPacketInternalDelegate(NetworkModuleProxy* module, byte* packet, int a3, int a4, ushort priority);
         private static Hook<SendPacketInternalDelegate>? SendPacketInternalHook;
 
