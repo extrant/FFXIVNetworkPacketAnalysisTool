@@ -626,6 +626,27 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
         [FieldOffset(0x00)] public fixed uint Ids[10];
         [FieldOffset(0x28)] public fixed ushort TimelineIds[10];
     }
+    [StructLayout(LayoutKind.Explicit, Size = 0x18)]
+    public unsafe struct DOWN_RecvPlaceCardPack
+    {
+        // --- 核心业务字段 ---
+        [FieldOffset(0x00)] public ushort EventId;   // c_ushort, 0x0
+        [FieldOffset(0x02)] public ushort Category;  // c_ushort, 0x2
+        [FieldOffset(0x0C)] public byte BlockId;     // c_ubyte, 0xC
+        [FieldOffset(0x0D)] public byte HandId;      // c_ubyte, 0xD
+        [FieldOffset(0x0E)] public ushort CardId;    // c_ushort, 0xE
+        [FieldOffset(0x10)] public uint Flags;       // c_uint, 0x10
 
+        // 加上这个特性可以方便在调试器的“局部变量”窗口直接看到结果
+        public int ForceHandId => GetForceHandId();
+
+        private int GetForceHandId()
+        {
+            // 这里的逻辑必须和 Python 严格一致
+            // Python: (self._flags >> 28) // 2
+            int val = (int)((Flags >> 28) / 2);
+            return val < 5 ? val : -1; // C# 中 int? 或用 -1 代表 None 更安全
+        }
+    }
     // 在这里添加更多 DOWN 包结构体
 }

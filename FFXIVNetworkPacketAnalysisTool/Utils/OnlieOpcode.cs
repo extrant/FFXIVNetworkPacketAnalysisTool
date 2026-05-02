@@ -68,7 +68,7 @@ public class OnlineOpcode
         else
         {
             Plugin.ChatGui.PrintError($"{gameVersion} 联网Opcode版本未找到！");
-
+            LocalOpcode.SetLocalUpOpcode(Configuration.UpOpcodes);
             // 清空数据以防使用旧的或错误的数据
             Configuration.UpOpcodes.Clear();
             Configuration.DownOpcodes.Clear();

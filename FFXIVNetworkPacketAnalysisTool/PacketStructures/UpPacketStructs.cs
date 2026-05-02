@@ -270,7 +270,19 @@ namespace FFXIVNetworkPacketAnalysisTool.PacketStructures
         [FieldOffset(0x0)] public float Rotation;
         [FieldOffset(0x4)] public Vector3 Position;
     }
-    
+
+    [StructLayout((LayoutKind.Explicit), Size = 0x18)]
+    public unsafe struct UP_SendPlaceCardPack
+    {
+        [FieldOffset(0x00)] public ushort event_id;
+        [FieldOffset(0x02)] public ushort category;
+        [FieldOffset(0x04)] public uint unk0;
+        [FieldOffset(0x08)] public uint unk1;
+        [FieldOffset(0x0C)] public uint round;
+        [FieldOffset(0x10)] public uint hand_id;
+        [FieldOffset(0x14)] public uint block_id;
+    }
+
     /// <summary>
     /// 公共频道发言 
     /// </summary>

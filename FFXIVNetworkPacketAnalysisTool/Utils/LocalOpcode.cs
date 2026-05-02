@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Dalamud.Memory;
@@ -19,6 +19,7 @@ public static class LocalOpcode
 
     public static void SetLocalUpOpcode(Dictionary<int, string> opcodes)
     {
+        opcodes.TryAdd(985, "UP_SendPlaceCardPack");
         var type = typeof(LocalOpcode);
         foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
         {
